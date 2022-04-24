@@ -118,6 +118,26 @@ namespace ADO_AddressBook.ADO_AddressBook
             }
             return nameList;
         }
+        //UC 6: Ability to Retrieve Count of Person belonging to a City or State
+        public string PrintCountDataBasedOnCity()
+        {
+            string nameList = "";
+            //query to be executed
+            string query = @"select Count(*),state,City from Address_Book_Table Group by state,City";
+            SqlCommand sqlCommand = new SqlCommand(query, this.sqlConnection);
+            sqlConnection.Open();
+            SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+            if (sqlDataReader.HasRows)
+            {
+                while (sqlDataReader.Read())
+                {
+                    Console.WriteLine("{0} \t {1} \t {2}", sqlDataReader[0], sqlDataReader[1], sqlDataReader[2]);
+                    nameList += sqlDataReader[0].ToString() + " ";
+                }
+            }
+            return nameList;
+        }
+       
 
         public void DisplayEmployeeDetails(SqlDataReader sqlDataReader)
         {
