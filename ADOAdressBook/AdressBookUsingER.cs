@@ -108,5 +108,40 @@ namespace ADO_AddressBook.ADO_AddressBook
             SqlConnection.Close();
             return nameList;
         }
+
+        //Insert into Table using Transactions
+        public int InsertIntoTables()
+        {
+            int result = 0;
+            SqlConnection.Open();
+            using (SqlConnection)
+            {
+                //Begin SQL transaction
+                SqlTransaction sqlTransaction = SqlConnection.BeginTransaction();
+                SqlCommand sqlCommand = SqlConnection.CreateCommand();
+                sqlCommand.Transaction = sqlTransaction;
+                try
+                {
+                    //Insert data into Table
+                    sqlCommand.CommandText = "insert into Contact_Person values(1,'Neha','Kejriwal','3645 Catherine Street','Mysore','Karnataka',223001,8842905050,'neha@gmail.com','2019-02-03')";
+                    sqlCommand.ExecuteNonQuery();
+                    sqlCommand.CommandText = "insert into TypeManager values(3,5)";
+                    sqlCommand.ExecuteNonQuery();
+                    //Commit 
+                    sqlTransaction.Commit();
+                    Console.WriteLine("Updated!");
+                    result = 1;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    //Rollback to the point before exception
+                    sqlTransaction.Rollback();
+                    result = 1;
+                }
+            }
+            SqlConnection.Close();
+            return result;
+        }
     }
 }
