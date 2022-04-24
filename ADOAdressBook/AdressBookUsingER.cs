@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ADO_AddressBook.ADO_AddressBook
 {
@@ -11,6 +13,8 @@ namespace ADO_AddressBook.ADO_AddressBook
         public static string connection = @"Server=.;Database=Address_Book_Service_DB;Trusted_Connection=True;";
         //Represents a connection to Sql Server Database
         SqlConnection SqlConnection = new SqlConnection(connection);
+        private object contactList;
+
         public int AlterTableaddStartDate()
         {
             int result = 0;
@@ -31,10 +35,12 @@ namespace ADO_AddressBook.ADO_AddressBook
                 }
                 catch (Exception ex)
                 {
+
                     Console.WriteLine(ex.Message);
                     //Rollback to the point before exception
                     sqlTransaction.Rollback();
                     Console.WriteLine("Not Updated!");
+
                 }
             }
             SqlConnection.Close();
@@ -142,6 +148,50 @@ namespace ADO_AddressBook.ADO_AddressBook
             }
             SqlConnection.Close();
             return result;
+        }
+        // Ability to Add multiple Contacts to List
+        public int AddMultipleDataToList()
+        {
+            string nameList = "";
+            //query to be executed
+            string query = "select Address_BookName,FirstName,SecondName,Address,City,State,zip,PhoneNumber,Email,ContactType_Name from Contact_Person  INNER JOIN  Address_Book on Address_Book.Address_BookID=AddressBook_ID  INNER JOIN TypeManager on TypeManager.Contact_Identity=Contact_ID INNER JOIN ContactType on TypeManager.ContactType_Identity=ContactType_ID";
+            SqlCommand sqlCommand = new SqlCommand(query, this.SqlConnection);
+            SqlConnection.Open();
+            SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+            if (sqlDataReader.HasRows)
+            {
+                while (sqlDataReader.Read())
+                {
+
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    DisplayEmployeeDetails(sqlDataReader);
+                    nameList += sqlDataReader["FirstName"].ToString() + " ";
+                    stopWatch.Stop();
+                    Console.WriteLine("Time elapsed using Thread: {0}", stopWatch.ElapsedMilliseconds);
+                }
+            }
+            SqlConnection.Close();
+            return contactList.Count;
+        }
+
+        //Display all Object details
+        public void DisplayEmployeeDetails(SqlDataReader sqlDataReader)
+        {
+            ContactDataManager addressBook = new ContactDataManager();
+            addressBook.FirstName = Convert.ToString(sqlDataReader["FirstName"]);
+            addressBook.LastName = Convert.ToString(sqlDataReader["SecondName"]);
+            addressBook.Address = Convert.ToString(sqlDataReader["Address"] + " " + sqlDataReader["City"] + " " + sqlDataReader["State"] + " " + sqlDataReader["zip"]);
+            addressBook.PhoneNumber = Convert.ToInt64(sqlDataReader["PhoneNumber"]);
+            addressBook.Email = Convert.ToString(sqlDataReader["Email"]);
+            addressBook.AddressBookName = Convert.ToString(sqlDataReader["Address_BookName"]);
+            addressBook.Type = Convert.ToString(sqlDataReader["ContactType_Name"]);
+            Task task = new Task(() =>
+            {
+                Console.WriteLine("{0} \t {1} \t {2} \t {3} \t {4} \t {5} \t {6}", addressBook.FirstName, addressBook.LastName, addressBook.Address, addressBook.PhoneNumber, addressBook.Email, addressBook.AddressBookName, addressBook.Type);
+                contactList.Add(addressBook);
+            });
+            task.Start();
         }
     }
 }
