@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Text;
-
 namespace ADO_AddressBook.ADO_AddressBook
 {
     class AddressBookRespitory
@@ -11,6 +10,8 @@ namespace ADO_AddressBook.ADO_AddressBook
         public static string connection = @"Server=.;Database=Address_Book_Service_DB;Trusted_Connection=True;";
         //Represents a connection to Sql Server Database
         SqlConnection sqlConnection = new SqlConnection(connection);
+        private object addressBook;
+
         public int InsertIntoTable(ContactDataManager addressBook)
         {
             int result = 0;
@@ -53,6 +54,42 @@ namespace ADO_AddressBook.ADO_AddressBook
                 sqlConnection.Close();
             }
             return result;
+        }
+        //UseCase 3: Modify Existing Contact using their name
+        public int UpdateQueryBasedonName()
+        {
+            //Open Connection
+            sqlConnection.Open();
+            string query = "Update Address_Book_Table set Email = 'RaniMalvi@gmail.com' where FirstName = 'Rani'";
+            //Pass query to TSql
+            SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
+            int result = sqlCommand.ExecuteNonQuery();
+            if (result != 0)
+            {
+                Console.WriteLine("Updated!");
+            }
+            else
+            {
+                Console.WriteLine("Not Updated!");
+            }
+
+            //Close Connection
+            sqlConnection.Close();
+            return result;
+        }
+
+        public void DisplayEmployeeDetails(SqlDataReader sqlDataReader)
+        {
+
+            addressBook.FirstName = Convert.ToString(sqlDataReader["FirstName"]);
+            addressBook.LastName = Convert.ToString(sqlDataReader["LastName"]);
+            addressBook.Address = Convert.ToString(sqlDataReader["Address"] + " " + sqlDataReader["City"] + " " + sqlDataReader["State"] + " " + sqlDataReader["zip"]);
+            addressBook.PhoneNumber = Convert.ToInt64(sqlDataReader["PhoneNumber"]);
+            addressBook.Email = Convert.ToString(sqlDataReader["email"]);
+            addressBook.AddressBookName = Convert.ToString(sqlDataReader["AddressBookName"]);
+            addressBook.Type = Convert.ToString(sqlDataReader["TypeOfAddressBook"]);
+            Console.WriteLine("{0} | {1} | {2} | {3} | {4} | {5} | {6}", addressBook.FirstName, addressBook.LastName, addressBook.Address, addressBook.PhoneNumber, addressBook.Email, addressBook.AddressBookName, addressBook.Type);
+
         }
     }
 }
