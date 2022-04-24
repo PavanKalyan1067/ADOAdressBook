@@ -99,6 +99,25 @@ namespace ADO_AddressBook.ADO_AddressBook
             sqlConnection.Close();
             return result;
         }
+        //UseCase 5: Ability to Retrieve Person belonging to a City or State from the Address Book
+        public string PrintDataBasedOnCity(string city, string State)
+        {
+            string nameList = "";
+            //query to be executed
+            string query = @"select * from Address_Book_Table where City =" + "'" + city + "' or State=" + "'" + State + "'";
+            SqlCommand sqlCommand = new SqlCommand(query, this.sqlConnection);
+            sqlConnection.Open();
+            SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+            if (sqlDataReader.HasRows)
+            {
+                while (sqlDataReader.Read())
+                {
+                    DisplayEmployeeDetails(sqlDataReader);
+                    nameList += sqlDataReader["FirstName"].ToString() + " ";
+                }
+            }
+            return nameList;
+        }
 
         public void DisplayEmployeeDetails(SqlDataReader sqlDataReader)
         {
