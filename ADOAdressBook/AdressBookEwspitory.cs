@@ -156,7 +156,25 @@ namespace ADO_AddressBook.ADO_AddressBook
             }
             return nameList;
         }
-       
+        //UC 8: Ability to get number of contact persons by Type
+        public string ContactDataBasedOnType()
+        {
+            string nameList = "";
+            //query to be executed
+            string query = @"select Count(*) as NumberOfContacts,Type from Address_Book_Table Group by Type";
+            SqlCommand sqlCommand = new SqlCommand(query, this.sqlConnection);
+            sqlConnection.Open();
+            SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+            if (sqlDataReader.HasRows)
+            {
+                while (sqlDataReader.Read())
+                {
+                    Console.WriteLine("{0} \t {1}", sqlDataReader[0], sqlDataReader[1]);
+                    nameList += sqlDataReader[0].ToString() + " ";
+                }
+            }
+            return nameList;
+        }
 
         public void DisplayEmployeeDetails(SqlDataReader sqlDataReader)
         {
